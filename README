@@ -1,0 +1,103 @@
+# Tema 2 - PA
+## Autor: Dabelea Ioana-Viviana 323CB
+---
+### Cuprins:
+1. [Supercomputer](#supercomputer)
+2. [Ferate](#ferate)
+4. [Magazin](#magazin)
+---
+
+
+
+### Supercomputer
+#### Complexitate:
+|Complexitate spatiala | Complexitate temporala
+| ----------- | ----------- | ----------- |
+|O(N + M)       | O(N + M) |
+
+#### Idee:
+Principalul algoritm de la care am plecat in incercarea de a rezolva problema este **sortarea topologica**, algoritm pe care l-am modificat putin pentru a imi oferi raspunsul dorit.
+
+Pentru fiecare nod am pastrat intr-un vector numarul de noduri care au muchie directa spre nodul meu. De asemenea, am folosit si doua cozi in care pastram pe rand nodurile de tipul 1, respectiv 2, care nu au muchii directe spre ele.
+
+Pentru a calcula numarul minim de context switch-uri care se pot efectua, am implementat functia:
+<code> int minim_switches(array v, vector<array> adj, vector<array> dependencies, queue<int> *q, int type) </code>
+
+Functia primeste ca parametrii:
+- v: vectorul in care retin tipul fiecarui nod
+- adj: vectorul de adiacenta
+- dependencies: vectorul de dependente
+- q: coada in care retin nodurile de tipul 1, respectiv 2, care nu au muchii directe spre ele
+- type: tipul nodului de la care vreau sa plec
+
+O sa extrag din coada specifica variabilelei type elemente cat timp ea nu este goala. Pentru fiecare element extras, o sa parcurg vectorul de adiacenta si o sa scad din numarul de dependente al fiecarui nod adiacent. Daca numarul de dependente al unui nod devine 0, il adaug in coada specifica tipului sau. 
+
+In cazul in care coada specifica tipului meu actual devine goala, inseamna ca sunt nevoita sa fac un context switch. Pentru a afla numarul de context switch-uri, am folosit o variabila <code>context_switches</code> care se incrementeaza de fiecare data cand coada specifica tipului meu actual devine goala. De asemenea, schimbam si tipul nodului meu actual.
+
+La final, returnez numarul de context switch-uri.
+
+Pentru a ma asigura ca, la final, afisez numarul minim de context switch-uri, am apelat functia descrisa mai sus pentru fiecare nod de tipul 1 si 2, iar apoi am afisat minimul dintre cele doua valori.
+
+---
+
+### Ferate
+#### Complexitate:
+|Complexitate spatiala | Complexitate temporala
+| ----------- | ----------- | ----------- |
+|O(N + M)       | O(N + M) |
+
+#### Idee:
+Pentru aceasta problema am plecat de la urmatoarele observatii:
+- Nodurile la care se poate ajunge direct de la sursa nu ne intereseaza asa tare, deci le putem ignora
+- Pentru a obtine o modalitate de a ajunge de la nodul sursa la toate celelate noduri, este suficient sa conectam nodul sursa de cate un nod random dintr-o componenta tare conexa. 
+
+Prima observatie se poate rezolva usor, parcurgand cu ajutorului unui **DFS** graful si marcand nodurile la care se poate ajunge direct de la sursa.
+
+Pentru a doua observatie, este important sa tinem cont de doua lucruri:
+- Trebuie sa obtinem toate componentele tari conexe din graful nostru
+- Pentru a obtine un numar minim de muchii adaugate la graf pentru a realiza conexiunea, trebuie sa urmarim si daca exista muchii care leaga doua componente tari conexe diferite
+
+Pentru a obtine toate componentele conexe, am implementat algoritmul [**Tarjan**](https://ocw.cs.pub.ro/courses/pa/laboratoare/laborator-07#tarjan_scc). Astfel, pentru fiecare nod, am pastrat intr-un vector <code>succ</code> numarul componentei tari conexe din care face parte.
+
+Pentru a afla daca exista muchii care leaga doua componente tari conexe diferite, am parcurs graful si am verificat daca exista muchii care leaga doua noduri din componente tari conexe diferite. Daca exista, am creat o noua matrice de adiacenta, in care am adaugat doar muchiile care leaga doua componente tari conexe diferite.
+
+La final, pentru a vedea numarul minim de extra-conexiuni care trebuie facute, am incercat sa aflu numarul minim de drumuri de lungime maximala din graful nou obtinut (cel cu muchiile care leaga doua componente tari conexe diferite). Pentru a afla asta, pentru fiecare componenta conexta am pastrat si o matrice de parinti (<code>parents[x][0] = y</code> insemnand ca exista muchia y -> x). Astfel, pornind de la un nod random, am parcurs atat parintii cat si copiii nodului, marcand nodurile prin care am trecut. La final, am afisat numarul de repetari ale acestui proces.
+
+---
+### Teleportare
+
+#### Complexitate:
+|Complexitate spatiala | Complexitate temporala
+| ----------- | ----------- | ----------- |
+|O(N + M)       | O(M * $\log(M)$) |
+
+#### Idee:
+Pentru aceasta problema se poate observa ca daca nu avem muchii speciale (sau daca aceste muchii au **p** = 1), se poate aplica un Dijsktra simplu, care sa calculeze distanta minima de la nodul sursa la toate celelalte noduri.
+
+Problema vine atunci cand avem si muchii speciale care au p-ul diferit de 1. Pentru acestea, ar trebui sa retinem pentru fiecare nod, distanta minima de la sursa la el, care are priorietatea ca este divizibila cu p-ul meu. Stim ca p-ul este un numar de la 1 la 8, deci nu am avea nevoie de un numar exagerat de vectori de drumuri minime. Problema intervine: cum calculam aceste drumuri minime?
+
+Am observat ca este suficient sa calculez o matrice <code>dist</code>, cu urmatoarea proprietate:
+- <code>dist[i][j]</code> = distanta minima de la nodul sursa la nodul j, care are prioritatea ca are restul **i** la impartirea cel mai mic multiplu al tuturor p-urilor.
+
+De ce am ales asta? Pentru ca, aceste drumuri ma pot ajuta sa construiect drumul minim, multiplu de p, de la nodul sursa la alt nod (am putea obtine drumul minim ca fiind drumul de la 1 la 2, care are restul k la impartirea cu p, concatenat cu drumul de la 2 la 3, care are restul p - k la impartirea cu p, etc).
+
+Astfel, am aplicat Dijkstra, tinand cont ca am mai multe nivele pe care as putea sa le parcurg. 
+
+---
+### Magazin
+
+#### Complexitate:
+|Complexitate spatiala | Complexitate temporala
+| ----------- | ----------- | ----------- |
+|O(N + M)       | O(N + M) |
+
+#### Idee:
+Pentru a rezolva aceasta problema, am aplicat un algoritm de tip **DFS**, pornind de la radacina arborelui meu (nodul 1). Acest algoritm l-am facut in functia <code>void get_ordered_nodes(int node)</code>
+
+In aceasta functie am salvat si ordinea in care am parcurs nodurile(<code>nodes_ordered</code>), ordine de care o sa am nevoie pentru a raspunde la query-urile de mai tarziu. Mai mult, pentru fiecare nod am salvat si numarul de noduri din subarborele care il are ca radacina. 
+
+Astfel, raspunsul la un query de forma D E poate sa fie obtinut astfel:
+- Daca E este mai mare decat numarul de noduri din subarborele lui D, atunci raspunsul este -1
+- Altfel, raspunsul este nodul de pe a E-a pozitie de dupa nodul D in vectorul <code>nodes_ordered</code>
+
+Pentru a creste eficienta algoritmului, am pastrat intr-un vector <code> positions </code> pozitia fiecarui nod in vectorul <code>nodes_ordered</code>. Astfel, raspunsul la un query de forma D E poate fi obtinut in *O(1)*.
